@@ -168,6 +168,5 @@
 
 ---
 
-## Slide 20: Q&A
-- Thank you!
-- Questions?
+# AUTHORS 
+ - Abhay Goyal
