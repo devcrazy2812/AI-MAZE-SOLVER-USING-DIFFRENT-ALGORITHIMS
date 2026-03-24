@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Solver AI - Pathfinding Visualizer</title>
+    <meta name="description" content="Interactive AI Maze Solver with BFS, DFS, and A* pathfinding algorithm visualization. Generate mazes and watch algorithms solve them in real-time." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><text x='7' y='23' font-size='18'>🧩</text></svg>" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- ═══ HEADER ═══ -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">🧩</span>
+                <div>
+                    <h1 class="logo-title">Maze Solver AI</h1>
+                    <p class="logo-sub">Interactive Pathfinding Visualizer</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge" id="badge-size">--</span>
+                <span class="badge badge-accent" id="badge-algo">BFS</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ MAIN LAYOUT ═══ -->
+    <main class="app-layout">
+        <!-- LEFT: Maze Canvas -->
+        <section class="maze-section">
+            <div class="canvas-wrapper" id="canvas-wrapper">
+                <canvas id="maze-canvas"></canvas>
+                <div class="canvas-overlay" id="canvas-overlay">
+                    <div class="overlay-icon">🏗️</div>
+                    <p class="overlay-title">No Maze Loaded</p>
+                    <p class="overlay-sub">Click <strong>"Generate"</strong> or press <kbd>R</kbd> to create a maze</p>
+                </div>
+            </div>
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span class="status-text" id="status-text">Ready</span>
+                </div>
+                <div class="status-right">
+                    <span class="status-info" id="status-coords"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Control Panel -->
+        <aside class="control-panel">
+            <!-- Algorithm Section -->
+            <div class="panel-section">
+                <h3 class="section-title">Algorithm</h3>
+                <div class="algo-grid">
+                    <button class="algo-btn active" data-algo="bfs" id="btn-bfs">BFS</button>
+                    <button class="algo-btn" data-algo="dfs" id="btn-dfs">DFS</button>
+                    <button class="algo-btn" data-algo="astar-m" id="btn-astar-m">A* Manhattan</button>
+                    <button class="algo-btn" data-algo="astar-e" id="btn-astar-e">A* Euclidean</button>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="panel-section">
+                <h3 class="section-title">Controls</h3>
+
+                <label class="slider-label">
+                    <span>Maze Size</span>
+                    <span class="slider-value" id="size-value">31</span>
+                </label>
+                <input type="range" class="slider" id="size-slider" min="11" max="101" value="31" step="2" />
+
+                <label class="slider-label" style="margin-top:12px;">
+                    <span>Speed (ms/step)</span>
+                    <span class="slider-value" id="speed-value">30</span>
+                </label>
+                <input type="range" class="slider" id="speed-slider" min="1" max="200" value="30" step="1" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="panel-section">
+                <div class="btn-grid">
+                    <button class="btn btn-primary" id="btn-generate">
+                        <span class="btn-icon">🔄</span> Generate
+                    </button>
+                    <button class="btn btn-primary" id="btn-solve">
+                        <span class="btn-icon">▶️</span> Solve
+                    </button>
+                    <button class="btn btn-secondary" id="btn-reset">
+                        <span class="btn-icon">↩️</span> Reset
+                    </button>
+                    <button class="btn btn-secondary" id="btn-screenshot">
+                        <span class="btn-icon">📸</span> Screenshot
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="panel-section">
+                <h3 class="section-title">Performance</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Path Length</div>
+                        <div class="stat-value" id="stat-path">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Explored</div>
+                        <div class="stat-value" id="stat-nodes">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="stat-time">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Memory</div>
+                        <div class="stat-value" id="stat-memory">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="panel-section">
+                <h3 class="section-title">Legend</h3>
+                <div class="legend-grid">
+                    <div class="legend-item"><span class="dot" style="background:#15121e"></span>Wall</div>
+                    <div class="legend-item"><span class="dot" style="background:#2d3750"></span>Path</div>
+                    <div class="legend-item"><span class="dot" style="background:#22c55e"></span>Start</div>
+                    <div class="legend-item"><span class="dot" style="background:#ef4444"></span>End</div>
+                    <div class="legend-item"><span class="dot" style="background:#3b82f6"></span>Visited</div>
+                    <div class="legend-item"><span class="dot" style="background:#fbbf24"></span>Frontier</div>
+                    <div class="legend-item"><span class="dot" style="background:#f43f5e"></span>Current</div>
+                    <div class="legend-item"><span class="dot" style="background:#10b981"></span>Solution</div>
+                </div>
+            </div>
+
+            <!-- Shortcuts -->
+            <div class="panel-section shortcuts-section">
+                <h3 class="section-title">Shortcuts</h3>
+                <div class="shortcuts-grid">
+                    <span><kbd>R</kbd> Generate</span>
+                    <span><kbd>Space</kbd> Solve</span>
+                    <span><kbd>C</kbd> Reset</span>
+                    <span><kbd>1-4</kbd> Algorithm</span>
+                    <span><kbd>↑↓</kbd> Speed</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+        <p>Built by <strong>Abhay Goyal</strong> & <strong>Maydhansh Nitin Kadge</strong> · BFS · DFS · A* Search</p>
+    </footer>
+
+    <script src="maze.js"></script>
+</body>
+</html>
